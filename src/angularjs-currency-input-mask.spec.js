@@ -1,13 +1,14 @@
 describe('Formatting numbers',function() {
     beforeEach(module('cur.$mask'));
 
-    var $compile, $rootScope, $filter;
+    var $compile, $rootScope, $filter, $timeout;
 
-    beforeEach(inject(function(_$compile_, _$rootScope_, _$filter_){
+    beforeEach(inject(function(_$compile_, _$rootScope_, _$filter_, _$timeout_){
         // The injector unwraps the underscores (_) from around the parameter names when matching
         $compile = _$compile_;
         $rootScope = _$rootScope_;
         $filter = _$filter_;
+        $timeout = _$timeout_;
     }));
 
     describe('Testing directive', function() {
@@ -19,7 +20,7 @@ describe('Formatting numbers',function() {
             expect(element.val()).toEqual('$0.01');
         })
 
-        it('typing negative number with standard config and hard-coded $ should return $0.01',function() {
+        it('typing negative number with standard config and hard-coded $ should return -$12',function() {
             var element = $compile("<input type=\"text\" ng-model=\"currency\" mask-currency=\"'$'\" />")($rootScope);
             $rootScope.$digest();
             element.val('-12').triggerHandler('input');
@@ -93,6 +94,161 @@ describe('Formatting numbers',function() {
             expect(element.val()).toBe('12.34 p.')
         })
 
+        it('changing the config does not give the focus to the input', function() {
+            $rootScope.currency = 12.34;
+            var configStr = "{orientation:'r',indentation:' '}"
+            var element = $compile("<input type=\"text\" ng-model=\"currency\" mask-currency=\"'p.'\" config=\""+configStr+"\" />")($rootScope);
+            spyOn(element[0], 'focus');
+            $rootScope.$digest();
+            configStr.orientation = 'l';
+            $rootScope.$digest();
+            $timeout.flush();
+            expect(element[0].focus).not.toHaveBeenCalled();
+        })
+
+        it('changing the input value should trigger the min validator',function() {
+            var element = $compile("<input type=\"text\" ng-model=\"currency\" min=\"0\"  mask-currency=\"'$'\" />")($rootScope);
+            $rootScope.$digest();
+            element.val('-1.00').triggerHandler('input');
+            expect(element.hasClass('ng-valid')).toEqual(false);
+            expect(element.hasClass('ng-invalid-max')).toEqual(false);
+            expect(element.hasClass('ng-invalid-min')).toEqual(true);
+            element.val('2.00').triggerHandler('input');
+            expect(element.hasClass('ng-valid')).toEqual(true);
+            expect(element.hasClass('ng-invalid-max')).toEqual(false);
+            expect(element.hasClass('ng-invalid-min')).toEqual(false);
+            element.val('').triggerHandler('input');
+            expect(element.hasClass('ng-valid')).toEqual(true);
+            expect(element.hasClass('ng-invalid-max')).toEqual(false);
+            expect(element.hasClass('ng-invalid-min')).toEqual(false);
+        })
+
+        it('changing the input value without min should not trigger the min validator',function() {
+            var element = $compile("<input type=\"text\" ng-model=\"currency\" min=\"\"  mask-currency=\"'$'\" />")($rootScope);
+            $rootScope.$digest();
+            element.val('-1.00').triggerHandler('input');
+            expect(element.hasClass('ng-valid')).toEqual(true);
+            expect(element.hasClass('ng-invalid-min')).toEqual(false);
+            element.val('').triggerHandler('input');
+            expect(element.hasClass('ng-valid')).toEqual(true);
+            expect(element.hasClass('ng-invalid-min')).toEqual(false);
+        })
+
+        it('changing the model value should trigger the min validator',function() {
+            var element = $compile("<input type=\"text\" ng-model=\"modelValue\" min=\"0\"  mask-currency=\"'$'\" />")($rootScope);
+            $rootScope.$digest();
+            $rootScope.modelValue = -1.00;
+            $rootScope.$digest();
+            expect(element.hasClass('ng-valid')).toEqual(false);
+            expect(element.hasClass('ng-invalid-max')).toEqual(false);
+            expect(element.hasClass('ng-invalid-min')).toEqual(true);
+            $rootScope.modelValue = 2.00;
+            $rootScope.$apply();
+            expect(element.hasClass('ng-valid')).toEqual(true);
+            expect(element.hasClass('ng-invalid-max')).toEqual(false);
+            expect(element.hasClass('ng-invalid-min')).toEqual(false);
+            $rootScope.modelValue = undefined;
+            $rootScope.$apply();
+            expect(element.hasClass('ng-valid')).toEqual(true);
+            expect(element.hasClass('ng-invalid-max')).toEqual(false);
+            expect(element.hasClass('ng-invalid-min')).toEqual(false);
+        })
+
+        it('changing the model value without min should not trigger the min validator',function() {
+            var element = $compile("<input type=\"text\" ng-model=\"modelValue\" min=\"\"  mask-currency=\"'$'\" />")($rootScope);
+            $rootScope.$digest();
+            $rootScope.modelValue = -1.00;
+            $rootScope.$digest();
+            expect(element.hasClass('ng-valid')).toEqual(true);
+            expect(element.hasClass('ng-invalid-min')).toEqual(false);
+            $rootScope.modelValue = undefined;
+            $rootScope.$digest();
+            expect(element.hasClass('ng-valid')).toEqual(true);
+            expect(element.hasClass('ng-invalid-min')).toEqual(false);
+        })
+
+        it('changing the model value with invalid value should not trigger the min validator',function() {
+            var element = $compile("<input type=\"text\" ng-model=\"modelValue\" min=\"0\"  mask-currency=\"'$'\" />")($rootScope);
+            $rootScope.$digest();
+            $rootScope.modelValue = 'None parsable value';
+            $rootScope.$digest();
+            expect(element.hasClass('ng-valid')).toEqual(true);
+            expect(element.hasClass('ng-invalid-max')).toEqual(false);
+            expect(element.hasClass('ng-invalid-min')).toEqual(false);
+        })
+
+        it('changing the input value should trigger the max validator',function() {
+            var element = $compile("<input type=\"text\" ng-model=\"currency\" max=\"100\"  mask-currency=\"'$'\" />")($rootScope);
+            $rootScope.$digest();
+            element.val('200.00').triggerHandler('input');
+            expect(element.hasClass('ng-valid')).toEqual(false);
+            expect(element.hasClass('ng-invalid-max')).toEqual(true);
+            expect(element.hasClass('ng-invalid-min')).toEqual(false);
+            element.val('2').triggerHandler('input');
+            expect(element.hasClass('ng-valid')).toEqual(true);
+            expect(element.hasClass('ng-invalid-max')).toEqual(false);
+            expect(element.hasClass('ng-invalid-min')).toEqual(false);
+            element.val('').triggerHandler('input');
+            expect(element.hasClass('ng-valid')).toEqual(true);
+            expect(element.hasClass('ng-invalid-max')).toEqual(false);
+            expect(element.hasClass('ng-invalid-min')).toEqual(false);
+        })
+
+        it('changing the input value without max should not trigger the max validator',function() {
+            var element = $compile("<input type=\"text\" ng-model=\"currency\" max=\"\"  mask-currency=\"'$'\" />")($rootScope);
+            $rootScope.$digest();
+            element.val('1.00').triggerHandler('input');
+            expect(element.hasClass('ng-valid')).toEqual(true);
+            expect(element.hasClass('ng-invalid-max')).toEqual(false);
+            element.val('').triggerHandler('input');
+            expect(element.hasClass('ng-valid')).toEqual(true);
+            expect(element.hasClass('ng-invalid-max')).toEqual(false);
+        })
+
+
+        it('changing the model value should trigger the max validator',function() {
+            var element = $compile("<input type=\"text\" ng-model=\"modelValue\" max=\"100\"  mask-currency=\"'$'\" />")($rootScope);
+            $rootScope.$digest();
+            $rootScope.modelValue = 200.00;
+            $rootScope.$digest();
+            expect(element.hasClass('ng-valid')).toEqual(false);
+            expect(element.hasClass('ng-invalid-max')).toEqual(true);
+            expect(element.hasClass('ng-invalid-min')).toEqual(false);
+            $rootScope.modelValue = 2.00;
+            $rootScope.$apply();
+            expect(element.hasClass('ng-valid')).toEqual(true);
+            expect(element.hasClass('ng-invalid-max')).toEqual(false);
+            expect(element.hasClass('ng-invalid-min')).toEqual(false);
+            $rootScope.modelValue = undefined;
+            $rootScope.$apply();
+            expect(element.hasClass('ng-valid')).toEqual(true);
+            expect(element.hasClass('ng-invalid-max')).toEqual(false);
+            expect(element.hasClass('ng-invalid-min')).toEqual(false);
+        })
+
+        it('changing the model value without max should not trigger the min validator',function() {
+            var element = $compile("<input type=\"text\" ng-model=\"modelValue\" max=\"\"  mask-currency=\"'$'\" />")($rootScope);
+            $rootScope.$digest();
+            $rootScope.modelValue = 2.00;
+            $rootScope.$digest();
+            expect(element.hasClass('ng-valid')).toEqual(true);
+            expect(element.hasClass('ng-invalid-min')).toEqual(false);
+            $rootScope.modelValue = undefined;
+            $rootScope.$digest();
+            expect(element.hasClass('ng-valid')).toEqual(true);
+            expect(element.hasClass('ng-invalid-min')).toEqual(false);
+        })
+
+        it('changing the model value with invalid value should not trigger the max validator',function() {
+            var element = $compile("<input type=\"text\" ng-model=\"modelValue\" max=\"100\"  mask-currency=\"'$'\" />")($rootScope);
+            $rootScope.$digest();
+            $rootScope.modelValue = 'None parsable value';
+            $rootScope.$digest();
+            console.log(element);
+            expect(element.hasClass('ng-valid')).toEqual(true);
+            expect(element.hasClass('ng-invalid-max')).toEqual(false);
+            expect(element.hasClass('ng-invalid-min')).toEqual(false);
+        })
     })
 
     describe('Testing filter', function() {

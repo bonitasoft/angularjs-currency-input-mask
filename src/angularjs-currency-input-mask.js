@@ -248,30 +248,29 @@
                     })
 
                     ctrl.$parsers.push(function(inputValue) {
-                        var parsedValue = parseFloat(parser(inputValue, scope.currency));
-                        if(parsedValue && attrs.min) {
-                            ctrl.$setValidity('min', parsedValue >= attrs.min);
+                        var parsedValue = parser(inputValue, support.currency(scope.currency));
+                        var floatValue = parseFloat(parsedValue);
+                        if(!isNaN(floatValue) && attrs.min) {
+                            ctrl.$setValidity('min', floatValue >= attrs.min);
                         }
-                        if(parsedValue && attrs.max) {
-                            ctrl.$setValidity('max',  parsedValue <= attrs.max);
+                        if(!isNaN(floatValue) && attrs.max) {
+                            ctrl.$setValidity('max',  floatValue <= attrs.max);
                         }
-                        return parser(inputValue, support.currency(scope.currency));
+                        return parsedValue;
                     })
 
                     ctrl.$formatters.push(function(value) {
-                        var parsedValue = parseFloat(value);
-                        if(value && !parseFloat(value)) {
-                            ctrl.$setValidity('invalid', true);
+                        var formattedValue = value?view(round(value,config.decimalSize), support.currency(scope.currency)) : null;
+                        var floatValue = parseFloat(value);
+                        if(!isNaN(floatValue) && attrs.min) {
+                            ctrl.$setValidity('min', floatValue >= attrs.min);
                         }
-                        if(parsedValue && attrs.min) {
-                            ctrl.$setValidity('min', parsedValue >= attrs.min);
-                        }
-                        if(parsedValue && attrs.max) {
-                            ctrl.$setValidity('max', parsedValue <= attrs.max);
+                        if(!isNaN(floatValue) && attrs.max) {
+                            ctrl.$setValidity('max', floatValue <= attrs.max);
                         }
                         ctrl.$setDirty();
                         ctrl.$validate();
-                        return value?view(round(value,config.decimalSize), support.currency(scope.currency)) : null;
+                        return formattedValue;
                     })
                 }
             }

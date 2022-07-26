@@ -232,6 +232,22 @@
                         return modelValue;
                     }
 
+                    function validateMin(floatValue) {
+                        if(!isNaN(floatValue) && attrs.min) {
+                            ctrl.$setValidity('min', floatValue >= attrs.min);
+                        } else {
+                            ctrl.$setValidity('min', true);
+                        }
+                    }
+
+                    function validateMax(floatValue) {
+                        if(!isNaN(floatValue) && attrs.max) {
+                            ctrl.$setValidity('max', floatValue <= attrs.max);
+                        } else {
+                            ctrl.$setValidity('max', true);
+                        }
+                    }
+
                     scope.$watch('currency',function() {
                         parser(ctrl.$viewValue, support.currency(scope.currency));
                     })
@@ -250,24 +266,16 @@
                     ctrl.$parsers.push(function(inputValue) {
                         var parsedValue = parser(inputValue, support.currency(scope.currency));
                         var floatValue = parseFloat(parsedValue);
-                        if(!isNaN(floatValue) && attrs.min) {
-                            ctrl.$setValidity('min', floatValue >= attrs.min);
-                        }
-                        if(!isNaN(floatValue) && attrs.max) {
-                            ctrl.$setValidity('max',  floatValue <= attrs.max);
-                        }
+                        validateMin(floatValue);
+                        validateMax(floatValue)
                         return parsedValue;
                     })
 
                     ctrl.$formatters.push(function(value) {
                         var formattedValue = value?view(round(value,config.decimalSize), support.currency(scope.currency)) : null;
                         var floatValue = parseFloat(value);
-                        if(!isNaN(floatValue) && attrs.min) {
-                            ctrl.$setValidity('min', floatValue >= attrs.min);
-                        }
-                        if(!isNaN(floatValue) && attrs.max) {
-                            ctrl.$setValidity('max', floatValue <= attrs.max);
-                        }
+                        validateMin(floatValue);
+                        validateMax(floatValue)
                         ctrl.$setDirty();
                         ctrl.$validate();
                         return formattedValue;

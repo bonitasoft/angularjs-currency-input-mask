@@ -128,7 +128,6 @@
                         $timeout(function() {
                             // IE < 9 Support
                             if (document.selection) {
-                                input.focus();
                                 var range = document.selection.createRange();
                                 var rangelen = range.text.length;
                                 range.moveStart('character', -input.value.length);
@@ -156,7 +155,6 @@
                     return $q(function(resolve, reject) {
                         $timeout(function() {
                             if (input.setSelectionRange) {
-                                input.focus();
                                 input.setSelectionRange(pos, pos);
                                 resolve(true);
                             } else if (input.createTextRange) {
@@ -250,11 +248,29 @@
                     })
 
                     ctrl.$parsers.push(function(inputValue) {
-                        return parser(inputValue, support.currency(scope.currency));
+                        var parsedValue = parser(inputValue, support.currency(scope.currency));
+                        var floatValue = parseFloat(parsedValue);
+                        if(!isNaN(floatValue) && attrs.min) {
+                            ctrl.$setValidity('min', floatValue >= attrs.min);
+                        }
+                        if(!isNaN(floatValue) && attrs.max) {
+                            ctrl.$setValidity('max',  floatValue <= attrs.max);
+                        }
+                        return parsedValue;
                     })
 
                     ctrl.$formatters.push(function(value) {
-                        return value?view(round(value,config.decimalSize), support.currency(scope.currency)) : null;
+                        var formattedValue = value?view(round(value,config.decimalSize), support.currency(scope.currency)) : null;
+                        var floatValue = parseFloat(value);
+                        if(!isNaN(floatValue) && attrs.min) {
+                            ctrl.$setValidity('min', floatValue >= attrs.min);
+                        }
+                        if(!isNaN(floatValue) && attrs.max) {
+                            ctrl.$setValidity('max', floatValue <= attrs.max);
+                        }
+                        ctrl.$setDirty();
+                        ctrl.$validate();
+                        return formattedValue;
                     })
                 }
             }

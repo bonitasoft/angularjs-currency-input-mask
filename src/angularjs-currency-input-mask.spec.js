@@ -141,6 +141,17 @@ describe('Formatting numbers',function() {
             expect(element.hasClass('ng-invalid-min')).toEqual(false);
         })
 
+        it('empty the input value after invalid min should reset the min validator',function() {
+            var element = $compile("<input type=\"text\" ng-model=\"currency\" min=\"2\"  mask-currency=\"'$'\" />")($rootScope);
+            $rootScope.$digest();
+            element.val('1.00').triggerHandler('input');
+            expect(element.hasClass('ng-valid')).toEqual(false);
+            expect(element.hasClass('ng-invalid-min')).toEqual(true);
+            element.val('').triggerHandler('input');
+            expect(element.hasClass('ng-valid')).toEqual(true);
+            expect(element.hasClass('ng-invalid-min')).toEqual(false);
+        })
+
         it('changing the model value should trigger the min validator',function() {
             var element = $compile("<input type=\"text\" ng-model=\"modelValue\" min=\"0\"  mask-currency=\"'$'\" />")($rootScope);
             $rootScope.$digest();
@@ -212,6 +223,16 @@ describe('Formatting numbers',function() {
             expect(element.hasClass('ng-invalid-max')).toEqual(false);
         })
 
+        it('empty the input value after invalid max should reset the max validator',function() {
+            var element = $compile("<input type=\"text\" ng-model=\"currency\" max=\"2\"  mask-currency=\"'$'\" />")($rootScope);
+            $rootScope.$digest();
+            element.val('4.00').triggerHandler('input');
+            expect(element.hasClass('ng-valid')).toEqual(false);
+            expect(element.hasClass('ng-invalid-max')).toEqual(true);
+            element.val('').triggerHandler('input');
+            expect(element.hasClass('ng-valid')).toEqual(true);
+            expect(element.hasClass('ng-invalid-max')).toEqual(false);
+        })
 
         it('changing the model value should trigger the max validator',function() {
             var element = $compile("<input type=\"text\" ng-model=\"modelValue\" max=\"100\"  mask-currency=\"'$'\" />")($rootScope);

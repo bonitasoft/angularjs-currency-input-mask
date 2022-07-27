@@ -81,14 +81,14 @@
             },
             format: function(value,currency) {
                 return this
-                        .value(value)
-                        .clear()
-                        .minimum()
-                        .fraction()
-                        .ltrim()
-                        .group()
-                        .currency(currency)
-                        .toString();
+                    .value(value)
+                    .clear()
+                    .minimum()
+                    .fraction()
+                    .ltrim()
+                    .group()
+                    .currency(currency)
+                    .toString();
             },
             toString: function() {
                 return this._value;
@@ -266,8 +266,9 @@
                     ctrl.$parsers.push(function(inputValue) {
                         var parsedValue = parser(inputValue, support.currency(scope.currency));
                         var floatValue = parseFloat(parsedValue);
+
                         validateMin(floatValue);
-                        validateMax(floatValue)
+                        validateMax(floatValue);
                         return parsedValue;
                     })
 
@@ -275,9 +276,7 @@
                         var formattedValue = value?view(round(value,config.decimalSize), support.currency(scope.currency)) : null;
                         var floatValue = parseFloat(value);
                         validateMin(floatValue);
-                        validateMax(floatValue)
-                        ctrl.$setDirty();
-                        ctrl.$validate();
+                        validateMax(floatValue);
                         return formattedValue;
                     })
                 }

@@ -113,6 +113,14 @@ describe('Formatting numbers',function() {
             expect(element[0].focus).not.toHaveBeenCalled();
         })
 
+        it('changing the input value should save the model value as a number',function() {
+            var element = $compile("<input type=\"text\" ng-model=\"currency\" min=\"0\"  mask-currency=\"'$'\" />")($rootScope);
+            $rootScope.$digest();
+            element.val('-1.02').triggerHandler('input');
+            expect($rootScope.currency).toBe(-1.02);
+            expect(typeof $rootScope.currency === 'number').toBeTrue();
+        })
+
         it('changing the input value should trigger the min validator',function() {
             var element = $compile("<input type=\"text\" ng-model=\"currency\" min=\"0\"  mask-currency=\"'$'\" />")($rootScope);
             $rootScope.$digest();

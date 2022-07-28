@@ -269,7 +269,7 @@
 
                         validateMin(floatValue);
                         validateMax(floatValue);
-                        return parsedValue;
+                        return floatValue;
                     })
 
                     ctrl.$formatters.push(function(value) {

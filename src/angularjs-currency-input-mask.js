@@ -6,9 +6,13 @@
         .directive('maskCurrency',maskCurrency())
         .filter('printCurrency', printCurrency())
 
-    function removeNotNumericCharacters(value){
+    function removeNotNumericCharacters(value) {
         //Allow to use negative character on first position of value
         return value.replace(/[^\d-]/g, '').replace(/(?!^-)-/g, '');
+    }
+
+    function removeNumericCharacters(value) {
+        return value ? value.replace(/\d/, '') : value;
     }
 
     function mask(config) {
@@ -190,6 +194,7 @@
                         config = support.config(scope.config);
 
                     function view(value,currency) {
+                        currency = removeNumericCharacters(currency);
                         return mask(config).format(value,currency);
                     }
 
@@ -203,6 +208,7 @@
                     }
 
                     function parser(inputValue,currency) {
+                        currency = removeNumericCharacters(currency);
                         var modelValue = null;
                         if (inputValue) {
                             var value = view(inputValue,currency);

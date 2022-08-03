@@ -280,10 +280,28 @@ describe('Formatting numbers',function() {
             $rootScope.$digest();
             $rootScope.modelValue = 'None parsable value';
             $rootScope.$digest();
-            console.log(element);
             expect(element.hasClass('ng-valid')).toEqual(true);
             expect(element.hasClass('ng-invalid-max')).toEqual(false);
             expect(element.hasClass('ng-invalid-min')).toEqual(false);
+        })
+
+
+        it('should remove numeric character in symbol configuration ',function() {
+            var configStr = "{orientation:'r'}"
+            var element = $compile("<input type=\"text\" ng-model=\"modelValue\" mask-currency=\"'1'\" config=\""+configStr+"\" />")($rootScope);
+            $rootScope.$digest();
+            $rootScope.modelValue = 1540;
+            $rootScope.$digest();
+            expect(element.val()).toBe('1,540.00');
+        });
+
+        it('should remove numeric character containing in symbol configuration ',function() {
+            var configStr = "{orientation:'r',indentation:' '}"
+            var element = $compile("<input type=\"text\" ng-model=\"modelValue\" mask-currency=\"'a1b'\" config=\""+configStr+"\" />")($rootScope);
+            $rootScope.$digest();
+            $rootScope.modelValue = 1540.12;
+            $rootScope.$digest();
+            expect(element.val()).toBe('1,540.12 ab');
         })
     })
 

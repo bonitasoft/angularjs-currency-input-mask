@@ -295,9 +295,27 @@ describe('Formatting numbers',function() {
             expect(element.val()).toBe('1,540.00');
         });
 
+        it('should remove multiple numeric character in symbol configuration ',function() {
+            var configStr = "{orientation:'r'}"
+            var element = $compile("<input type=\"text\" ng-model=\"modelValue\" mask-currency=\"'123'\" config=\""+configStr+"\" />")($rootScope);
+            $rootScope.$digest();
+            $rootScope.modelValue = 1540;
+            $rootScope.$digest();
+            expect(element.val()).toBe('1,540.00');
+        });
+
         it('should remove numeric character containing in symbol configuration ',function() {
             var configStr = "{orientation:'r',indentation:' '}"
             var element = $compile("<input type=\"text\" ng-model=\"modelValue\" mask-currency=\"'a1b'\" config=\""+configStr+"\" />")($rootScope);
+            $rootScope.$digest();
+            $rootScope.modelValue = 1540.12;
+            $rootScope.$digest();
+            expect(element.val()).toBe('1,540.12 ab');
+        })
+
+        it('should remove multiple numeric character containing in symbol configuration ',function() {
+            var configStr = "{orientation:'r',indentation:' '}"
+            var element = $compile("<input type=\"text\" ng-model=\"modelValue\" mask-currency=\"'1a1b1'\" config=\""+configStr+"\" />")($rootScope);
             $rootScope.$digest();
             $rootScope.modelValue = 1540.12;
             $rootScope.$digest();

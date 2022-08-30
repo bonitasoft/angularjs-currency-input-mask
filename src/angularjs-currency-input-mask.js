@@ -12,7 +12,7 @@
     }
 
     function removeNumericCharacters(value) {
-        return value ? value.replace(/\d/, '') : value;
+        return value ? value.replace(/\d/g, '') : value;
     }
 
     function mask(config) {

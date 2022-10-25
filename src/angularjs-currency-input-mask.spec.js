@@ -20,11 +20,11 @@ describe('Formatting numbers',function() {
             expect(element.val()).toEqual('$0.01');
         })
 
-        it('typing negative number with standard config and hard-coded $ should return -$12',function() {
+        it('typing negative number with standard config and hard-coded $ should return -$0.12',function() {
             var element = $compile("<input type=\"text\" ng-model=\"currency\" mask-currency=\"'$'\" />")($rootScope);
             $rootScope.$digest();
             element.val('-12').triggerHandler('input');
-            expect(element.val()).toEqual('-$12');
+            expect(element.val()).toEqual('-$0.12');
         })
 
         it('typing negative number with standard config and hard-coded $ should return -$ when user write only - character',function() {
@@ -68,6 +68,16 @@ describe('Formatting numbers',function() {
             var element = $compile("<input type=\"text\" ng-model=\"currency\" mask-currency=\"'$'\" config=\"{indentation:' '}\" />")($rootScope);
             $rootScope.$digest();
             element.val('1').triggerHandler('input');
+            var empty = element.val().slice(0, -1);
+            element.val(empty).triggerHandler('input');
+            element.val(empty).triggerHandler('input');
+            expect(element.val()).toEqual('');
+        })
+
+        it('typing -1 and erase it twice with indentation and hard-coded $ should return empty', function() {
+            var element = $compile("<input type=\"text\" ng-model=\"currency\" mask-currency=\"'$'\" config=\"{indentation:' '}\" />")($rootScope);
+            $rootScope.$digest();
+            element.val('-1').triggerHandler('input');
             var empty = element.val().slice(0, -1);
             element.val(empty).triggerHandler('input');
             element.val(empty).triggerHandler('input');

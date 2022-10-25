@@ -16,7 +16,7 @@
     }
 
     function isNegative(value) {
-        return value.startsWith('-');
+        return value.charAt(0) === '-';
     }
 
     function setNegative(value) {
@@ -47,7 +47,7 @@
                     if (this._value === '-') {
                         return this;
                     }
-                    let negative = isNegative(this._value);
+                    var negative = isNegative(this._value);
                     this._value = Math.abs(this._value).toString();
                     var regex = RegExp('^(\\d{1,' + config.decimalSize + '})$','g'),
                         replace = pad("$1",config.decimalSize);
@@ -67,9 +67,10 @@
                 return this;
             },
             ltrim: function() {
-                var regex = RegExp('((?=^)|(?<=\-))(0)(?!' + escape(config.decimal) + ')','g'),
+                var regex = RegExp('(?=^)(0)(?!' + escape(config.decimal) + ')','g'),
                     replace = "";
                 this._value = this._value.replace(regex,replace)
+                this._value = this._value.replace('-00','-0')
                 return this;
             },
             group: function() {

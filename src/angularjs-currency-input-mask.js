@@ -67,10 +67,13 @@
                 return this;
             },
             ltrim: function() {
-                var regex = RegExp('(?=^)(0)(?!' + escape(config.decimal) + ')','g'),
+                var negative = isNegative(this._value);
+                var regex = RegExp('^[-]?[0]*(?!' + escape(config.decimal) + ')','g'),
                     replace = "";
                 this._value = this._value.replace(regex,replace)
-                this._value = this._value.replace('-00','-0')
+                if (negative) {
+                    this._value = setNegative(this._value);
+                }
                 return this;
             },
             group: function() {
@@ -232,9 +235,13 @@
                             modelValue = model(value);
                             if (value == inputValue) {
                                 value = undefined;
-                            } else if (value == last && value.replace(/[^\d]/g,'') == '000') {
-                                value = '';
-                                modelValue = null;
+                            } else if (value == last) {
+                                value = value.replace(/[-]?[^\d]/g,'');
+                                if (/[0]{2,4}/.test(value) || value == '') {
+                                    // For 0 removal: covers decimalSize 0 to 3
+                                    value = '';
+                                    modelValue = null;
+                                }
                             }
 
                             if (value !== undefined) {

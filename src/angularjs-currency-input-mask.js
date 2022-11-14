@@ -237,8 +237,8 @@
                                 value = undefined;
                             } else if (value == last) {
                                 value = value.replace(/[-]?[^\d]/g,'');
-                                if (/[0]{2,4}/.test(value) || value == '') {
-                                    // For 0 removal: covers decimalSize 0 to 3
+                                if (/[0]{2,10}/.test(value) || value == '') {
+                                    // For 0 removal: covers decimalSize 0 to 10
                                     value = '';
                                     modelValue = null;
                                 }

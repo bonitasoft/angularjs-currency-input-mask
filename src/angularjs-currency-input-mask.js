@@ -15,6 +15,14 @@
         return value ? value.replace(/\d/g, '') : value;
     }
 
+    function isNegative(value) {
+        return value.charAt(0) === '-';
+    }
+
+    function setNegative(value) {
+        return '-' + value;
+    }
+
     function mask(config) {
         function pad(value,size) {
             return new Array(size).concat([value]).join('0');
@@ -36,24 +44,36 @@
             },
             minimum: function() {
                 if (config.decimalSize > 0) {
-                    var regex = RegExp('^(\\d{1,'+config.decimalSize+'})$','g'),
-                        replace = pad("$1",config.decimalSize)
+                    if (this._value === '-') {
+                        return this;
+                    }
+                    var negative = isNegative(this._value);
+                    this._value = Math.abs(this._value).toString();
+                    var regex = RegExp('^(\\d{1,' + config.decimalSize + '})$','g'),
+                        replace = pad("$1",config.decimalSize);
                     this._value = this._value.replace(regex,replace)
+                    if (negative) {
+                        this._value = setNegative(this._value);
+                    }
                 }
                 return this;
             },
             fraction: function() {
                 if (config.decimalSize > 0) {
-                    var regex = RegExp('(\\d)(?=\\d{' + config.decimalSize + '}$)', 'g'),
+                    var regex = RegExp('(-?\\d)(?=\\d{' + config.decimalSize + '}$)', 'g'),
                         replace = "$1"+config.decimal
                     this._value = this._value.replace(regex, replace)
                 }
                 return this;
             },
             ltrim: function() {
-                var regex = RegExp('(?=^)(0)(?!'+escape(config.decimal)+')','g'),
+                var negative = isNegative(this._value);
+                var regex = RegExp('^[-]?[0]*(?!' + escape(config.decimal) + ')','g'),
                     replace = "";
                 this._value = this._value.replace(regex,replace)
+                if (negative) {
+                    this._value = setNegative(this._value);
+                }
                 return this;
             },
             group: function() {
@@ -201,7 +221,7 @@
                     function model(value) {
                         value = removeNotNumericCharacters(value);
                         if (config.decimalSize > 0) {
-                            var regex = RegExp('(\\d)(?=\\d{'+config.decimalSize+'}$)','g');
+                            var regex = RegExp('(-?\\d)(?=\\d{' + config.decimalSize + '}$)','g');
                             value = value.replace(regex, "$1.");
                         }
                         return value;
@@ -215,9 +235,13 @@
                             modelValue = model(value);
                             if (value == inputValue) {
                                 value = undefined;
-                            } else if (value == last && value.replace(/[^\d]/g,'') == '000') {
-                                value = '';
-                                modelValue = null;
+                            } else if (value == last) {
+                                value = value.replace(/[-]?[^\d]/g,'');
+                                if (/[0]{2,10}/.test(value) || value == '') {
+                                    // For 0 removal: covers decimalSize 0 to 10
+                                    value = '';
+                                    modelValue = null;
+                                }
                             }
 
                             if (value !== undefined) {

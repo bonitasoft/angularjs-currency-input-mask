@@ -11,6 +11,10 @@ describe('Formatting numbers',function() {
         $timeout = _$timeout_;
     }));
 
+    function simulateBackspace(value){
+        return value.slice(0,-1);
+    }
+
     describe('Testing directive', function() {
 
         it('typing 1 with standard config and hard-coded $ should return $0.01',function() {
@@ -20,11 +24,11 @@ describe('Formatting numbers',function() {
             expect(element.val()).toEqual('$0.01');
         })
 
-        it('typing negative number with standard config and hard-coded $ should return -$12',function() {
+        it('typing negative number with standard config and hard-coded $ should return -$0.12',function() {
             var element = $compile("<input type=\"text\" ng-model=\"currency\" mask-currency=\"'$'\" />")($rootScope);
             $rootScope.$digest();
             element.val('-12').triggerHandler('input');
-            expect(element.val()).toEqual('-$12');
+            expect(element.val()).toEqual('-$0.12');
         })
 
         it('typing negative number with standard config and hard-coded $ should return -$ when user write only - character',function() {
@@ -60,7 +64,7 @@ describe('Formatting numbers',function() {
             var element = $compile("<input type=\"text\" ng-model=\"currency\" mask-currency=\"'$'\" config=\"{indentation:' '}\" />")($rootScope);
             $rootScope.$digest();
             element.val('1').triggerHandler('input');
-            element.val(element.val().slice(0, -1)).triggerHandler('input');
+            element.val(simulateBackspace(element.val())).triggerHandler('input');
             expect(element.val()).toEqual('$ 0.00');
         })
 
@@ -68,9 +72,27 @@ describe('Formatting numbers',function() {
             var element = $compile("<input type=\"text\" ng-model=\"currency\" mask-currency=\"'$'\" config=\"{indentation:' '}\" />")($rootScope);
             $rootScope.$digest();
             element.val('1').triggerHandler('input');
-            var empty = element.val().slice(0, -1);
-            element.val(empty).triggerHandler('input');
-            element.val(empty).triggerHandler('input');
+            element.val(simulateBackspace(element.val())).triggerHandler('input');
+            element.val(simulateBackspace(element.val())).triggerHandler('input');
+            expect(element.val()).toEqual('');
+        })
+
+        it('typing -1 and erase it twice with indentation and hard-coded $ should return empty', function() {
+            var element = $compile("<input type=\"text\" ng-model=\"currency\" mask-currency=\"'$'\" config=\"{indentation:' '}\" />")($rootScope);
+            $rootScope.$digest();
+            element.val('-1').triggerHandler('input');
+            element.val(simulateBackspace(element.val())).triggerHandler('input');
+            element.val(simulateBackspace(element.val())).triggerHandler('input');
+            expect(element.val()).toEqual('');
+        })
+
+        it('typing -1 and erase it twice with indentation, hard-coded $ and decimalSize 3 should return empty', function() {
+            var configStr = "{decimalSize:3, orientation:'l'}"
+            var element = $compile("<input type=\"text\" ng-model=\"currency\" mask-currency=\"'$'\" config=\""+configStr+"\" />")($rootScope);
+            $rootScope.$digest();
+            element.val('-1').triggerHandler('input');
+            element.val(simulateBackspace(element.val())).triggerHandler('input');
+            element.val(simulateBackspace(element.val())).triggerHandler('input');
             expect(element.val()).toEqual('');
         })
 

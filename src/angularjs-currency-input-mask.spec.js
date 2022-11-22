@@ -96,16 +96,6 @@ describe('Formatting numbers',function() {
             expect(element.val()).toEqual('');
         })
 
-        it('typing -1 and erase it twice with indentation, hard-coded $ and decimalSize 0 should return empty', function() {
-            var configStr = "{decimalSize:1}"
-            var element = $compile("<input type=\"text\" ng-model=\"currency\" mask-currency=\"'$'\" config=\""+configStr+"\"/>")($rootScope);
-            $rootScope.$digest();
-            element.val('-1').triggerHandler('input');
-            element.val(simulateBackspace(element.val())).triggerHandler('input');
-            element.val(simulateBackspace(element.val())).triggerHandler('input');
-            expect(element.val()).toEqual('');
-        })
-
         it('typing 1 with 8 zeros using BRL config should return 1.000.000,00', function() {
             var configStr = "{indentation: ' ', group:'.' ,decimal:','}"
             var element = $compile("<input type=\"text\" ng-model=\"currency\" mask-currency=\"'R$'\" config=\""+configStr+"\" />")($rootScope);
